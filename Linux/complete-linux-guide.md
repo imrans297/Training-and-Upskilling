@@ -661,6 +661,12 @@ echo "Compressed files:"
 ls -lh test_*.txt.*
 ```
 **Screenshot this comprehensive compression demo**
+![alt text](image-23.png)
+![alt text](image-24.png)
+![alt text](image-25.png)
+![alt text](image-26.png)
+![alt text](image-27.png)
+
 
 ### System Administration Commands
 ```bash
@@ -749,6 +755,10 @@ echo "Disk usage:"
 df -h | head -5
 ```
 **Screenshot this system administration demo**
+![alt text](image-28.png)
+![alt text](image-29.png)
+![alt text](image-30.png)
+![alt text](image-31.png)
 
 ### Package Management (Ubuntu/Debian)
 ```bash
@@ -798,7 +808,8 @@ echo "Packages that depend on libc6:"
 apt rdepends libc6 2>/dev/null | head -10
 ```
 **Screenshot this package management demo**
-
+![alt text](image-32.png)
+![alt text](image-33.png)
 ---
 
 ## Hands-On Practice Exercises
@@ -839,6 +850,7 @@ echo "Root directory contents:"
 ls -la / | head -10
 ```
 **Run this script and screenshot the complete output**
+![alt text](image-34.png)
 
 ### Exercise Set 2: File System Management
 ```bash

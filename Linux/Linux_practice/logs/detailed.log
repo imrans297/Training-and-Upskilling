@@ -1,0 +1,4 @@
+2024-01-15 09:00:01 INFO [web-server] Server started
+2024-01-15 09:01:30 ERROR [web-server] Failed to load config
+2024-01-15 09:02:45 INFO [auth] User login successful
+2024-01-15 09:03:12 ERROR [database] Query timeout
