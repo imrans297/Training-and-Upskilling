@@ -335,9 +335,12 @@ Instance Store
    aws ec2 create-volume --size 100 --volume-type io2 --iops 1000 --multi-attach-enabled --availability-zone us-east-1a
    
    # Attach to multiple instances
-   aws ec2 attach-volume --volume-id vol-xxxxxxxxx --instance-id i-xxxxxxxxx --device /dev/sdf
-   aws ec2 attach-volume --volume-id vol-xxxxxxxxx --instance-id i-yyyyyyyyy --device /dev/sdf
+   aws ec2 attach-volume --volume-id vol-086452fb6a4bf89c3 --instance-id i-04eba2d5bb57941e7 --device /dev/sdf
+   aws ec2 attach-volume --volume-id vol-086452fb6a4bf89c3 --instance-id i-0f134549827a6a47e --device /dev/sdf
    ```
+**ScreenShot Placeholder**:
+   ![alt text](image-15.png)
+   ![alt text](image-14.png)
 
 3. **RAID Configuration**:
    ```bash
@@ -352,10 +355,6 @@ Instance Store
    # Test performance
    sudo fio --name=raid-test --filename=/raid-data/testfile --rw=randwrite --bs=4k --size=2G --numjobs=4 --time_based --runtime=60 --group_reporting
    ```
-
-**Screenshot Placeholder**:
-![Storage Optimization](screenshots/06-storage-optimization.png)
-*Caption: Storage performance optimization techniques*
 
 ## 📊 Storage Performance Characteristics
 
@@ -431,49 +430,9 @@ Instance Store
 - [Storage Performance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-performance.html)
 - [EBS Encryption](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html)
 
-## 📸 Screenshots Section
-*Document your storage configurations:*
 
-### Screenshot 1: EBS Volume Types
-![EBS Volume Types](screenshots/06-ebs-volume-types.png)
-*Caption: Different EBS volume types and their characteristics*
-
-### Screenshot 2: Volume Attachment
-![Volume Attachment](screenshots/06-volume-attachment.png)
-*Caption: Attaching EBS volume to EC2 instance*
-
-### Screenshot 3: EFS File System
-![EFS File System](screenshots/06-efs-filesystem.png)
-*Caption: Amazon EFS shared file system setup*
-
-### Screenshot 4: Performance Testing
-![Performance Testing](screenshots/06-performance-testing.png)
-*Caption: Storage performance comparison results*
-
-### Screenshot 5: Encryption Configuration
-![Encryption Config](screenshots/06-encryption-config.png)
-*Caption: EBS encryption settings and key management*
-
-### Screenshot 6: Snapshot Management
-![Snapshot Management](screenshots/06-snapshot-management.png)
-*Caption: EBS snapshot lifecycle and backup policies*
-
----
-
-## ✅ Section Completion Checklist
-- [ ] Understood different storage types and use cases
-- [ ] Created and managed EBS volumes
-- [ ] Implemented EBS snapshots and backup strategies
-- [ ] Tested instance store performance
-- [ ] Set up Amazon EFS shared file system
-- [ ] Configured EBS encryption
-- [ ] Optimized storage performance
-- [ ] Implemented cost optimization strategies
 
 ## 🎯 Next Steps
 Move to **Section 7: High Availability and Scalability: ELB & ASG** to learn about load balancing and auto scaling.
 
 ---
-
-*Last Updated: January 2025*
-*Course Version: 2025.1*
