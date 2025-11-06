@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": "SNS:Publish",
+      "Resource": "arn:aws:sns:us-east-1:535537926657:s3-notifications",
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:s3:::my-unique-bucket-name-12366645"
+        }
+      }
+    }
+  ]
+}

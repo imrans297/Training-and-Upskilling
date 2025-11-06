@@ -1,0 +1,40 @@
+{
+  "TopicConfigurations": [
+    {
+      "Id": "ObjectCreatedEvents",
+      "TopicArn": "arn:aws:sns:us-east-1:535537926657:s3-notifications",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "notifications/"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "LambdaFunctionConfigurations": [
+    {
+      "Id": "ProcessUploads",
+      "LambdaFunctionArn": "arn:aws:lambda:us-east-1:535537926657:function:process-s3-uploads",
+      "Events": ["s3:ObjectCreated:Put"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "uploads/"
+            },
+            {
+              "Name": "suffix",
+              "Value": ".jpg"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
