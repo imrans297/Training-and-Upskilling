@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObjectVersionForReplication",
+        "s3:GetObjectVersionAcl"
+      ],
+      "Resource": "arn:aws:s3:::webapp-dr-primary-bucket-1730806800/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::webapp-dr-primary-bucket-1730806800"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ReplicateObject",
+        "s3:ReplicateDelete"
+      ],
+      "Resource": "arn:aws:s3:::webapp-dr-secondary-bucket-1730806800/*"
+    }
+  ]
+}

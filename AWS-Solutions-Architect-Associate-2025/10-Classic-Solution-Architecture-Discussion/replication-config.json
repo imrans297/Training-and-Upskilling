@@ -1,0 +1,20 @@
+{
+  "Role": "arn:aws:iam::535537926657:role/S3ReplicationRole",
+  "Rules": [
+    {
+      "ID": "ReplicateEverything",
+      "Status": "Enabled",
+      "Priority": 1,
+      "Filter": {
+        "Prefix": ""
+      },
+      "Destination": {
+        "Bucket": "arn:aws:s3:::webapp-dr-secondary-bucket-1730806800",
+        "StorageClass": "STANDARD_IA"
+      },
+      "DeleteMarkerReplication": {
+        "Status": "Enabled"
+      }
+    }
+  ]
+}
