@@ -1,0 +1,34 @@
+{
+  "CallerReference": "my-distribution-2025-01-15-12366645",
+  "Comment": "CloudFront distribution for S3 website",
+  "DefaultRootObject": "index.html",
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "S3-my-cloudfront-website-12366645",
+        "DomainName": "my-cloudfront-website-12366645.s3.amazonaws.com",
+        "S3OriginConfig": {
+          "OriginAccessIdentity": ""
+        }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "S3-my-cloudfront-website-12366645",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "MinTTL": 0,
+    "ForwardedValues": {
+      "QueryString": false,
+      "Cookies": {
+        "Forward": "none"
+      }
+    },
+    "TrustedSigners": {
+      "Enabled": false,
+      "Quantity": 0
+    }
+  },
+  "Enabled": true,
+  "PriceClass": "PriceClass_100"
+}
