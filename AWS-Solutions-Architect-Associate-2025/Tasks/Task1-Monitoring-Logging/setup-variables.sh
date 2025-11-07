@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Infrastructure IDs
+export VPC_ID="vpc-07d20a5d5c8e1bf68"
+export IGW_ID="igw-09dc307ec4253f9d2"
+export PUBLIC_SUBNET_1="subnet-094589bbcac7eedb3"
+export PUBLIC_SUBNET_2="subnet-00b6bb36cc3eb12b3"
+export PRIVATE_SUBNET_1="subnet-0b04a7ca0b656bdab"
+export PRIVATE_SUBNET_2="subnet-09d82239650099ced"
+export NAT_GW="nat-02925c5c4241a74a8"
+export PUBLIC_RT="rtb-0d08f5a138b714acf"
+export PRIVATE_RT="rtb-025c3618295e8b0ea"
+export ALB_SG="sg-072dc2df87ca67a4b"
+export BASTION_SG="sg-05e6bda1e872f6596"
+export WEB_SG="sg-018fb3e3832084019"
+export ALB_ARN="arn:aws:elasticloadbalancing:us-east-1:535537926657:loadbalancer/app/monitoring-alb/461160c1ef47b1a0"
+export TG_ARN="arn:aws:elasticloadbalancing:us-east-1:535537926657:targetgroup/web-server-tg/b67e5b863618488f"
+export LAUNCH_TEMPLATE="lt-0aaf4b4ec7edb8546"
+export BASTION_INSTANCE="i-02025d06d5a153716"
+export SNS_TOPIC="arn:aws:sns:us-east-1:535537926657:monitoring-alerts"
+
+echo "=== Complete Infrastructure ==="
+echo "VPC_ID: $VPC_ID"
+echo "ALB_DNS: monitoring-alb-1520042674.us-east-1.elb.amazonaws.com"
+echo "BASTION_IP: 54.242.217.192"
+echo "ASG: web-server-asg (2 instances in private subnets)"
+echo "SNS_TOPIC: $SNS_TOPIC"
+echo "CloudWatch Logs: /aws/ec2/webserver/access & /aws/ec2/webserver/error"
