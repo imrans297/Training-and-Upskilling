@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Lab 2: CloudOps Stack with Advanced Features - Conditions and Parameters'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Environment type
+  
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t3.micro, t3.small, t3.medium]
+    Description: EC2 instance type
+  
+  KeyName:
+    Type: String
+    Default: demouserNvirginia
+    Description: EC2 Key Pair name
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, prod]
+  IsNotProduction: !Not [!Equals [!Ref Environment, prod]]
+  CreateMonitoring: !Or [!Equals [!Ref Environment, prod], !Equals [!Ref Environment, staging]]
+
+Resources:
+  CloudOpsVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub "CloudOps-VPC-${Environment}"
+        - Key: Environment
+          Value: !Ref Environment
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CloudOpsVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub "Public-Subnet-${Environment}"
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "CloudOps-IGW-${Environment}"
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref CloudOpsVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CloudOpsVPC
+      Tags:
+        - Key: Name
+          Value: !Sub "Public-Route-Table-${Environment}"
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "Security group for CloudOps ${Environment} instance"
+      VpcId: !Ref CloudOpsVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub "CloudOps-SG-${Environment}"
+
+  CloudOpsInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0e2c8caa4b6378d8c
+      InstanceType: !If [IsProduction, t3.medium, !Ref InstanceType]
+      KeyName: !Ref KeyName
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      Monitoring: !If [IsProduction, true, false]
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install -y apache2
+          systemctl start apache2
+          systemctl enable apache2
+          echo "<h1>CloudOps Web Server - ${Environment}</h1>" > /var/www/html/index.html
+          echo "<p>Instance Type: ${InstanceType}</p>" >> /var/www/html/index.html
+          echo "<p>Environment: ${Environment}</p>" >> /var/www/html/index.html
+      Tags:
+        - Key: Name
+          Value: !Sub "CloudOps-Instance-${Environment}"
+        - Key: Environment
+          Value: !Ref Environment
+
+  CPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateMonitoring
+    Properties:
+      AlarmName: !Sub "${Environment}-HighCPU"
+      AlarmDescription: !Sub "High CPU utilization for ${Environment} environment"
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: !If [IsProduction, 70, 80]
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref CloudOpsInstance
+      AlarmActions:
+        - !Ref SNSTopic
+
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Condition: CreateMonitoring
+    Properties:
+      TopicName: !Sub "CloudOps-Alerts-${Environment}"
+      DisplayName: !Sub "CloudOps Alerts - ${Environment}"
+
+Outputs:
+  InstanceId:
+    Description: Instance ID
+    Value: !Ref CloudOpsInstance
+    Export:
+      Name: !Sub "${AWS::StackName}-InstanceId"
+  
+  PublicIP:
+    Description: Public IP address
+    Value: !GetAtt CloudOpsInstance.PublicIp
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicIP"
+  
+  VPCId:
+    Description: VPC ID
+    Value: !Ref CloudOpsVPC
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCId"
+  
+  WebsiteURL:
+    Description: Website URL
+    Value: !Sub "http://${CloudOpsInstance.PublicIp}"
+  
+  Environment:
+    Description: Environment type
+    Value: !Ref Environment
+  
+  MonitoringEnabled:
+    Description: Whether monitoring is enabled
+    Value: !If [CreateMonitoring, "Yes", "No"]
