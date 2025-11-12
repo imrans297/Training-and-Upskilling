@@ -1,8 +1,11 @@
-# 🖥️ Cross-Account Transit Gateway - Manual Console Steps
+# Cross-Account Transit Gateway Setup - Manual Steps
 
-## **Account Details**
-- **Your Account**: `535537926657` (Owner/Sharer)
-- **Friend's Account**: `375039967967` (Peer/Accepter)
+## Overview
+This guide demonstrates how to set up a cross-account Transit Gateway connection between two AWS accounts using the AWS Console.
+
+**Accounts:**
+- Account A (Owner): `535537926657`
+- Account B (Peer): `375039967967`
 
 ---
 
@@ -320,3 +323,57 @@ aws ec2 describe-security-groups
 #### **Step 5: Delete Transit Gateway**
 1. **Transit Gateways**
 2. **Select TGW** → **Delete Transit Gateway**
+---
+## **SSH Agent Forwarding Setup**
+
+### **Start the SSH Agent**
+On your local machine terminal, start the SSH agent:
+```bash
+eval "$(ssh-agent -s)"
+```
+
+✅ Output should look like:
+```
+Agent pid 12345
+```
+
+### **Add Your Private Key to the Agent**
+Add your EC2 private key:
+```bash
+ssh-add mykey.pem
+```
+
+✅ If successful, you'll see:
+```
+Identity added: mykey.pem (ubuntu@your-machine)
+```
+
+Verify it's added:
+```bash
+ssh-add -l
+```
+
+### **Connect with Agent Forwarding Enabled**
+Use the -A flag to forward your SSH credentials:
+```bash
+ssh -A ubuntu@54.80.148.106
+```
+
+---
+
+## **Summary**
+
+This guide covered:
+1. Creating a Transit Gateway in the owner account
+2. Sharing the TGW via Resource Access Manager (RAM)
+3. Accepting the share in the peer account
+4. Creating VPCs and attachments in both accounts
+5. Configuring routing and security groups
+6. Testing cross-account connectivity
+7. SSH agent forwarding for secure connections
+
+**Key Benefits:**
+- Centralized network hub for multiple VPCs
+- Cross-account connectivity without VPC peering
+- Simplified routing and management
+- Scalable architecture for enterprise networks
