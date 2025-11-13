@@ -426,6 +426,9 @@ CloudWatch Log Groups:
 ![alt text](image-7.png)
 Logs from Private Instance connected through Bastion host:
 ![alt text](image-14.png)
+App Result:
+![alt text](image-20.png)
+
 ## 🔗 Access Instructions
 
 1. **Access web application**: `http://$ALB_DNS`
