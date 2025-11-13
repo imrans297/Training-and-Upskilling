@@ -47,7 +47,7 @@ resource "aws_backup_plan" "cloudops" {
 
     lifecycle {
       delete_after                = 30
-      move_to_cold_storage_after = 7
+      cold_storage_after         = 7
     }
 
     copy_action {
