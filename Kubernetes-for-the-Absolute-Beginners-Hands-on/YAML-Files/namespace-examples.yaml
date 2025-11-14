@@ -1,0 +1,43 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: development
+  labels:
+    env: dev
+---
+# ResourceQuota
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-quota
+  namespace: development
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    pods: "10"
+---
+# LimitRange
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-limits
+  namespace: development
+spec:
+  limits:
+  - max:
+      cpu: "2"
+      memory: 2Gi
+    min:
+      cpu: "100m"
+      memory: 64Mi
+    default:
+      cpu: "500m"
+      memory: 256Mi
+    defaultRequest:
+      cpu: "250m"
+      memory: 128Mi
+    type: Container

@@ -1,0 +1,20 @@
+# ConfigMap from literals
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_ENV: production
+  APP_DEBUG: "false"
+  LOG_LEVEL: info
+---
+# ConfigMap with file content
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-properties
+data:
+  app.properties: |
+    database.host=localhost
+    database.port=5432
+    database.name=myapp
