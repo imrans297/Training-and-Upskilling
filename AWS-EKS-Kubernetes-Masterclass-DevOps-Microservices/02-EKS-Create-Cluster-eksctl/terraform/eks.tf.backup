@@ -1,0 +1,71 @@
+# EKS Cluster
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 19.0"
+
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  cluster_endpoint_public_access = true
+
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
+  }
+
+  eks_managed_node_groups = {
+    general = {
+      name = "general-node-group"
+
+      instance_types = ["t3.medium"]
+      capacity_type  = "ON_DEMAND"
+
+      min_size     = 2
+      max_size     = 4
+      desired_size = 2
+
+      labels = {
+        role = "general"
+      }
+    }
+  }
+
+  cluster_enabled_log_types = ["api", "audit", "authenticator"]
+
+  # Cluster security group - restrict access
+  cluster_security_group_additional_rules = {
+    ingress_my_ip = {
+      description = "Access from my IP"
+      protocol    = "tcp"
+      from_port   = 443
+      to_port     = 443
+      type        = "ingress"
+      cidr_blocks = [var.my_ip]
+    }
+  }
+
+  # Node security group - restrict SSH
+  node_security_group_additional_rules = {
+    ingress_ssh_my_ip = {
+      description = "SSH from my IP"
+      protocol    = "tcp"
+      from_port   = 22
+      to_port     = 22
+      type        = "ingress"
+      cidr_blocks = [var.my_ip]
+    }
+  }
+}
