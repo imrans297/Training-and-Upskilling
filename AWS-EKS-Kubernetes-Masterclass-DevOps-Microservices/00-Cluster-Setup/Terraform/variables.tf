@@ -52,6 +52,12 @@ variable "environment" {
   default     = "training"
 }
 
+variable "key_pair_name" {
+  description = "EC2 Key Pair name for SSH access to worker nodes"
+  type        = string
+  default     = "eks-demo-1_keyIMR"
+}
+
 locals {
   common_tags = {
     Name        = var.cluster_name

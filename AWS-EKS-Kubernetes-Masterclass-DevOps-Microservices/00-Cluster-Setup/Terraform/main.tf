@@ -147,6 +147,87 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[count.index].id
 }
 
+# Security Groups
+resource "aws_security_group" "eks_cluster" {
+  name_prefix = "${var.cluster_name}-cluster-"
+  vpc_id      = aws_vpc.training_vpc.id
+
+  ingress {
+    description = "HTTPS from my IP"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["106.215.176.143/32"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(local.common_tags, {
+    Name = "${var.cluster_name}-cluster-sg"
+  })
+}
+
+resource "aws_security_group" "eks_nodes" {
+  name_prefix = "${var.cluster_name}-nodes-"
+  vpc_id      = aws_vpc.training_vpc.id
+
+  ingress {
+    description = "SSH from my IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["106.215.176.143/32"]
+  }
+
+  ingress {
+    description = "HTTP from my IP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["106.215.176.143/32"]
+  }
+
+  ingress {
+    description = "HTTPS from my IP"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["106.215.176.143/32"]
+  }
+
+  ingress {
+    description = "Node to node communication"
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    self        = true
+  }
+
+  ingress {
+    description = "Pod to pod communication"
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(local.common_tags, {
+    Name = "${var.cluster_name}-nodes-sg"
+  })
+}
+
 # EKS Cluster
 resource "aws_eks_cluster" "training_cluster" {
   name     = var.cluster_name
@@ -157,7 +238,8 @@ resource "aws_eks_cluster" "training_cluster" {
     subnet_ids              = concat(aws_subnet.private[*].id, aws_subnet.public[*].id)
     endpoint_private_access = true
     endpoint_public_access  = true
-    public_access_cidrs     = ["0.0.0.0/0"]
+    public_access_cidrs     = ["106.215.176.143/32"]
+    security_group_ids      = [aws_security_group.eks_cluster.id]
   }
 
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
@@ -188,6 +270,11 @@ resource "aws_eks_node_group" "training_nodes" {
 
   update_config {
     max_unavailable = 1
+  }
+
+  remote_access {
+    ec2_ssh_key               = var.key_pair_name
+    source_security_group_ids = [aws_security_group.eks_nodes.id]
   }
 
   depends_on = [
