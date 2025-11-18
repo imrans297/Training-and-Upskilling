@@ -71,7 +71,15 @@ kubectl get nodes -o wide
 
 # Test external access (replace with actual node IP)
 # curl http://<NODE-EXTERNAL-IP>:<NODE-PORT>
+Since your nodes are in private subnets without external IPs, you can test the NodePort service from within the cluster:
+kubectl run nodeport-test --image=busybox --rm -it -- sh -c "wget -qO- 10.0.10.182:$(kubectl get svc web-nodeport -o jsonpath='{.spec.ports[0].nodePort}
+')"
+kubectl get svc web-nodeport -o jsonpath='{.spec.ports[0].nodePort}'
+The NodePort service demonstrates external access capability. In a production environment with public nodes or a load balancer, you'd access it via http://<NODE-EXTERNAL-IP>:<NODE-PORT>
 ```
+### Screenshot:
+![alt text](image-1.png)
+![alt text](image.png)
 
 ### Exercise 3: LoadBalancer Service (Cloud Load Balancer)
 ```bash
@@ -85,6 +93,9 @@ kubectl get services -w
 # Test external access
 # curl http://<EXTERNAL-IP>
 ```
+### Screenshot:
+![alt text](image-2.png)
+![alt text](image-3.png)
 
 ### Exercise 4: Service with Selectors and Labels
 ```bash
@@ -102,6 +113,9 @@ kubectl describe service backend-service
 # Test label-based selection
 kubectl get pods --show-labels
 ```
+### Screenshot:
+![alt text](image-4.png)
+![alt text](image-5.png)
 
 ### Exercise 5: Multi-Port Service
 ```bash
@@ -153,6 +167,9 @@ EOF
 # Check service
 kubectl describe service multi-port-service
 ```
+### Screenshot
+![alt text](image-6.png)
+![alt text](image-7.png)
 
 ### Exercise 6: Service Discovery and DNS
 ```bash
@@ -172,6 +189,10 @@ kubectl run dns-test --image=busybox --rm -it -- sh
 # wget -qO- backend-service
 # exit
 ```
+### Screenshot
+![alt text](image-8.png)
+![alt text](image-9.png)
+![alt text](image-10.png)
 
 ### Exercise 7: Headless Service
 ```bash

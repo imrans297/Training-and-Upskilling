@@ -73,6 +73,10 @@ kubectl get pods -w
 kubectl get rs
 # You'll see old RS scaled down and new RS scaled up
 ```
+### Screenshot:
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
 
 ### Exercise 3: Rollout History and Rollback
 ```bash
@@ -98,6 +102,10 @@ kubectl rollout undo deployment/web-app --to-revision=1
 # Check rollback status
 kubectl rollout status deployment/web-app
 ```
+![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)
+![alt text](image-6.png)
 
 ### Exercise 4: Deployment with Resource Management
 ```bash
@@ -125,6 +133,9 @@ kubectl patch deployment resource-app -p '{
 kubectl describe deployment resource-app
 kubectl top pods -l app=resource-app
 ```
+### Screenshot:
+![alt text](image-7.png)
+![alt text](image-8.png)
 
 ### Exercise 5: Deployment Strategies
 ```bash
@@ -193,6 +204,8 @@ kubectl set image deployment/recreate-app nginx=nginx:1.21
 kubectl get pods -w
 # All pods will terminate before new ones start
 ```
+### Screenshot:
+![alt text](image-9.png)
 
 ### Exercise 7: Deployment Scaling
 ```bash
@@ -208,6 +221,7 @@ kubectl autoscale deployment web-app --cpu-percent=70 --min=2 --max=8
 # Check HPA status
 kubectl get hpa
 ```
+![alt text](image-10.png)
 
 ### Exercise 8: Deployment with Health Checks
 ```bash
@@ -250,6 +264,9 @@ EOF
 kubectl get pods
 kubectl describe pod <pod-name>
 ```
+![alt text](image-11.png)
+![alt text](image-12.png)
+![alt text](image-13.png)
 
 ## Advanced Exercises
 
@@ -272,6 +289,9 @@ kubectl patch service app-service -p '{"spec":{"selector":{"app":"green-app"}}}'
 # Verify switch
 kubectl describe service app-service
 ```
+### Screenshot:
+![alt text](image-14.png)
+![alt text](image-15.png)
 
 ### Exercise 10: Canary Deployment
 ```bash
@@ -282,6 +302,8 @@ kubectl create deployment main-app --image=nginx:1.20 --replicas=9
 kubectl create deployment canary-app --image=nginx:1.21 --replicas=1
 
 # Label both for service selection
+kubectl label deployment main-app app=web version=stable --overwrite
+kubectl label deployment canary-app app=web version=canary --overwrite
 kubectl label deployment main-app app=web version=stable
 kubectl label deployment canary-app app=web version=canary
 
@@ -290,7 +312,18 @@ kubectl expose deployment main-app --port=80 --name=web-service --selector=app=w
 
 # Check traffic distribution
 kubectl get pods -l app=web --show-labels
+
+here Main app: 9 replicas (90% of traffic)
+
+Canary app: 1 replica (10% of traffic)
+
+Service: Routes traffic to both based on app=web label
 ```
+### Screenshot:
+![alt text](image-16.png)
+![alt text](image-17.png)
+![alt text](image-18.png)
+![alt text](image-19.png)
 
 ## Monitoring and Troubleshooting
 

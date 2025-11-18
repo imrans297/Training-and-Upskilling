@@ -52,6 +52,8 @@ deployment.apps/nginx-rs    3/3     3            3           30s
 NAME                                   DESIRED   CURRENT   READY   AGE
 replicaset.apps/nginx-rs-7d4b7b8c5d   3         3         3       30s
 ```
+### Screenshot
+![alt text](image.png)
 
 ### Exercise 2: Scaling Operations
 ```bash
@@ -69,6 +71,8 @@ kubectl scale deployment nginx-rs --replicas=2
 kubectl get pods
 kubectl get rs
 ```
+### Screenshot:
+![alt text](image-1.png)
 
 ### Exercise 3: Self-Healing Demonstration
 ```bash
@@ -83,6 +87,8 @@ kubectl delete pod $POD_NAME
 kubectl get pods -w
 # You'll see the deleted pod terminating and new pod creating
 ```
+### Screenshot
+![alt text](image-2.png)
 
 ### Exercise 4: ReplicaSet with Labels
 ```bash
@@ -98,6 +104,8 @@ kubectl get pods --show-labels
 kubectl get pods -l app=web-app
 kubectl get pods -l tier=frontend
 ```
+### Screenshot:
+![alt text](image-3.png)
 
 ### Exercise 5: Resource Management with ReplicaSets
 ```bash
@@ -111,6 +119,9 @@ kubectl patch deployment resource-app -p '{"spec":{"template":{"spec":{"containe
 kubectl describe deployment resource-app
 kubectl top pods -l app=resource-app
 ```
+### Screenshot:
+![alt text](image-4.png)
+![alt text](image-5.png)
 
 ### Exercise 6: Rolling Updates with ReplicaSets
 ```bash
@@ -127,6 +138,8 @@ kubectl rollout status deployment/rolling-app
 kubectl get rs
 # You'll see old and new ReplicaSets
 ```
+### Screenshot:
+![alt text](image-6.png)
 
 ### Exercise 7: Manual ReplicaSet Creation (YAML)
 ```bash
@@ -159,6 +172,8 @@ EOF
 kubectl get rs manual-rs
 kubectl get pods -l app=manual-rs
 ```
+### Screenshot:
+![alt text](image-7.png)
 
 ## Advanced Exercises
 
@@ -168,7 +183,7 @@ kubectl get pods -l app=manual-rs
 kubectl create deployment hpa-demo --image=nginx --replicas=2
 
 # Create HPA (requires metrics-server)
-kubectl autoscale deployment hpa-demo --cpu-percent=50 --min=2 --max=10
+kubectl autoscale deployment hpa-demo --cpu-percent=50% --min=2 --max=10
 
 # Check HPA status
 kubectl get hpa
