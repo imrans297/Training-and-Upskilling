@@ -1,0 +1,41 @@
+# Small PVC for testing
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: small-pvc
+  namespace: storage-ebs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3-fast
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Medium PVC for applications
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: medium-pvc
+  namespace: storage-ebs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3-fast
+  resources:
+    requests:
+      storage: 5Gi
+---
+# High IOPS PVC for databases
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-pvc
+  namespace: storage-ebs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: io1-high-iops
+  resources:
+    requests:
+      storage: 10Gi

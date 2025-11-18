@@ -1,0 +1,38 @@
+# GP3 Storage Class (recommended)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3-fast
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  iops: "3000"
+  throughput: "125"
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+---
+# IO1 Storage Class (high IOPS)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: io1-high-iops
+provisioner: ebs.csi.aws.com
+parameters:
+  type: io1
+  iops: "1000"
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+---
+# GP2 Storage Class (standard)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp2-standard
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp2
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true

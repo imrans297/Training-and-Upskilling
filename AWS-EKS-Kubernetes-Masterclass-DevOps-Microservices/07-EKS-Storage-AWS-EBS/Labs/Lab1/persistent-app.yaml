@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-storage-app
+  namespace: storage-ebs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-storage
+  template:
+    metadata:
+      labels:
+        app: file-storage
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /usr/share/nginx/html
+        - name: logs-storage
+          mountPath: /var/log/nginx
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - |
+                echo "<h1>Persistent Storage Demo</h1>" > /usr/share/nginx/html/index.html
+                echo "<p>This content is stored on EBS volume</p>" >> /usr/share/nginx/html/index.html
+                echo "<p>Pod: PUNELPT0615</p>" >> /usr/share/nginx/html/index.html
+                echo "<p>Timestamp: Tuesday 18 November 2025 05:14:03 PM IST</p>" >> /usr/share/nginx/html/index.html
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: small-pvc
+      - name: logs-storage
+        persistentVolumeClaim:
+          claimName: medium-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-storage-service
+  namespace: storage-ebs
+spec:
+  selector:
+    app: file-storage
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30082
+  type: NodePort
