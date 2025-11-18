@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: s3-access-pod
+  namespace: pod-identity
+spec:
+  serviceAccountName: s3-access-sa
+  containers:
+  - name: aws-cli
+    image: amazon/aws-cli:latest
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do sleep 30; done"]
+    env:
+    - name: AWS_DEFAULT_REGION
+      value: "ap-south-1"
+  restartPolicy: Never
