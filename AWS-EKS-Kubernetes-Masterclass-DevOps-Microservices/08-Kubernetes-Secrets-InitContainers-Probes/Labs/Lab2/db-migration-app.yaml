@@ -1,0 +1,169 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: migration-scripts
+  namespace: secrets-probes
+data:
+  001-create-tables.sql: |
+    CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) NOT NULL,
+        email VARCHAR(100) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE IF NOT EXISTS products (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        price DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  002-seed-data.sql: |
+    INSERT IGNORE INTO users (username, email) VALUES 
+    ('admin', 'admin@example.com'),
+    ('user1', 'user1@example.com');
+    
+    INSERT IGNORE INTO products (name, price) VALUES 
+    ('Product A', 29.99),
+    ('Product B', 49.99);
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app-with-migration
+  namespace: secrets-probes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-app-with-migration
+  template:
+    metadata:
+      labels:
+        app: web-app-with-migration
+    spec:
+      initContainers:
+      - name: db-migration
+        image: mysql:8.0
+        env:
+        - name: MYSQL_HOST
+          value: "mysql-service.secrets-probes.svc.cluster.local"
+        - name: MYSQL_USER
+          value: "root"
+        - name: MYSQL_PASSWORD
+          value: "rootpassword"
+        - name: MYSQL_DATABASE
+          value: "webapp"
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Starting database migration..."
+          
+          # Wait for database to be ready
+          until mysql -h -u -p -e "SELECT 1"; do
+            echo "Waiting for database connection..."
+            sleep 5
+          done
+          
+          echo "Database connected. Running migrations..."
+          
+          # Run migration scripts
+          for script in /migrations/*.sql; do
+            echo "Executing ..."
+            mysql -h -u -p  < 
+          done
+          
+          echo "Database migration completed successfully!"
+        volumeMounts:
+        - name: migration-scripts
+          mountPath: /migrations
+      containers:
+      - name: web-app
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: app-content
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: migration-scripts
+        configMap:
+          name: migration-scripts
+      - name: app-content
+        configMap:
+          name: web-app-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-app-content
+  namespace: secrets-probes
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>App with Database Migration</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .success { background-color: #d4edda; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        </style>
+    </head>
+    <body>
+        <h1>🚀 Application with Database Migration</h1>
+        <div class="success">
+            <h3>✅ Database Migration Completed</h3>
+            <p>The application started successfully after running database migrations.</p>
+            <ul>
+                <li>Tables created: users, products</li>
+                <li>Seed data inserted</li>
+                <li>Application ready to serve requests</li>
+            </ul>
+        </div>
+    </body>
+    </html>
+---
+# MySQL database for testing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-db
+  namespace: secrets-probes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-db
+  template:
+    metadata:
+      labels:
+        app: mysql-db
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpassword"
+        - name: MYSQL_DATABASE
+          value: "webapp"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: secrets-probes
+spec:
+  selector:
+    app: mysql-db
+  ports:
+    - port: 3306
+      targetPort: 3306

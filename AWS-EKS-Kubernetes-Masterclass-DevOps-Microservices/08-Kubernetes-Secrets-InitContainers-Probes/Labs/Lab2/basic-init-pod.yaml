@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: basic-init-pod
+  namespace: secrets-probes
+spec:
+  initContainers:
+  - name: init-setup
+    image: busybox:1.35
+    command: ['sh', '-c']
+    args:
+    - |
+      echo "Starting initialization..."
+      echo "Checking system requirements..."
+      sleep 5
+      echo "Creating required directories..."
+      mkdir -p /shared-data/config
+      mkdir -p /shared-data/logs
+      echo "Writing initial configuration..."
+      echo "app.initialized=true" > /shared-data/config/app.properties
+      echo "init.timestamp=$(date)" >> /shared-data/config/app.properties
+      echo "Initialization completed successfully!"
+    volumeMounts:
+    - name: shared-data
+      mountPath: /shared-data
+  containers:
+  - name: main-app
+    image: nginx:alpine
+    command: ['sh', '-c']
+    args:
+    - |
+      echo "Main application starting..."
+      echo "Checking initialization status..."
+      cat /shared-data/config/app.properties
+      echo "Starting nginx..."
+      nginx -g 'daemon off;'
+    volumeMounts:
+    - name: shared-data
+      mountPath: /shared-data
+    ports:
+    - containerPort: 80
+  volumes:
+  - name: shared-data
+    emptyDir: {}

@@ -1,0 +1,181 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dependent-app
+  namespace: secrets-probes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dependent-app
+  template:
+    metadata:
+      labels:
+        app: dependent-app
+    spec:
+      initContainers:
+      - name: check-db
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Checking database connectivity..."
+          until nc -z mysql-service.secrets-probes.svc.cluster.local 3306; do
+            echo "Database not ready, waiting..."
+            sleep 5
+          done
+          echo "Database is ready!"
+      - name: check-redis
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Checking Redis connectivity..."
+          until nc -z redis-service.secrets-probes.svc.cluster.local 6379; do
+            echo "Redis not ready, waiting..."
+            sleep 5
+          done
+          echo "Redis is ready!"
+      - name: check-api
+        image: curlimages/curl:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Checking API service..."
+          until curl -f http://api-service.secrets-probes.svc.cluster.local:8080/health; do
+            echo "API service not ready, waiting..."
+            sleep 10
+          done
+          echo "API service is ready!"
+      containers:
+      - name: app
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: app-content
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: app-content
+        configMap:
+          name: dependent-app-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dependent-app-content
+  namespace: secrets-probes
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Service Dependency App</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .dependency { background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        </style>
+    </head>
+    <body>
+        <h1>🔗 Service Dependency Application</h1>
+        <p>This application started only after all dependencies were ready:</p>
+        <div class="dependency">✅ Database (MySQL) - Ready</div>
+        <div class="dependency">✅ Cache (Redis) - Ready</div>
+        <div class="dependency">✅ API Service - Ready</div>
+        <p>All services are now available and the application is ready to serve requests.</p>
+    </body>
+    </html>
+---
+# Redis for dependency testing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-db
+  namespace: secrets-probes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-db
+  template:
+    metadata:
+      labels:
+        app: redis-db
+    spec:
+      containers:
+      - name: redis
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: secrets-probes
+spec:
+  selector:
+    app: redis-db
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+# Mock API service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-api
+  namespace: secrets-probes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mock-api
+  template:
+    metadata:
+      labels:
+        app: mock-api
+    spec:
+      containers:
+      - name: api
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: api-config
+          mountPath: /etc/nginx/conf.d
+      volumes:
+      - name: api-config
+        configMap:
+          name: api-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: secrets-probes
+data:
+  default.conf: |
+    server {
+        listen 80;
+        location /health {
+            return 200 '{"status":"healthy"}';
+            add_header Content-Type application/json;
+        }
+        location / {
+            return 200 '{"message":"Mock API Service"}';
+            add_header Content-Type application/json;
+        }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+  namespace: secrets-probes
+spec:
+  selector:
+    app: mock-api
+  ports:
+    - port: 8080
+      targetPort: 80

@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-data
+  namespace: secrets-probes
+data:
+  users.json: |
+    [
+      {"id": 1, "name": "John Doe", "role": "admin"},
+      {"id": 2, "name": "Jane Smith", "role": "user"},
+      {"id": 3, "name": "Bob Johnson", "role": "user"}
+    ]
+  config.yaml: |
+    app:
+      name: "Data Processing App"
+      version: "1.0.0"
+      features:
+        - data-processing
+        - user-management
+        - reporting
+    database:
+      host: "mysql-service"
+      port: 3306
+      name: "webapp"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-processing-app
+  namespace: secrets-probes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-processing-app
+  template:
+    metadata:
+      labels:
+        app: data-processing-app
+    spec:
+      initContainers:
+      - name: data-initializer
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+        - |
+          echo "Starting data initialization..."
+          mkdir -p /app-data/users /app-data/config /app-data/cache
+          cp /init-data/users.json /app-data/users/
+          cp /init-data/config.yaml /app-data/config/
+          echo "Generating cache data..."
+          i=1; while [ $i -le 100 ]; do echo "cache-entry-$i:value-$i" >> /app-data/cache/cache.txt; i=$((i+1)); done
+          chmod -R 755 /app-data
+          echo "Data initialization completed!"
+        volumeMounts:
+        - name: init-data
+          mountPath: /init-data
+        - name: app-data
+          mountPath: /app-data
+      containers:
+      - name: app
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: app-data
+          mountPath: /usr/share/nginx/html/data
+        - name: app-content
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: init-data
+        configMap:
+          name: init-data
+      - name: app-data
+        emptyDir: {}
+      - name: app-content
+        configMap:
+          name: data-app-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-app-content
+  namespace: secrets-probes
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Data Processing App</title>
+    </head>
+    <body>
+        <h1>Data Processing Application</h1>
+        <ul>
+            <li><a href="/data/users/users.json">User Data</a></li>
+            <li><a href="/data/config/config.yaml">Configuration</a></li>
+            <li><a href="/data/cache/cache.txt">Cache Data</a></li>
+        </ul>
+    </body>
+    </html>

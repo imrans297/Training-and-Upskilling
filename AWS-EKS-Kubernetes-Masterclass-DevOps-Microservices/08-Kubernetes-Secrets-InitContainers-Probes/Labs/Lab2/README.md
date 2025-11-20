@@ -76,6 +76,7 @@ kubectl get pods -w
 kubectl logs basic-init-pod -c init-setup
 kubectl logs basic-init-pod -c main-app
 ```
+![alt text](image.png)
 
 ### Exercise 2: Database Migration InitContainer
 ```bash
@@ -457,6 +458,7 @@ kubectl logs deployment/dependent-app -c check-db
 kubectl logs deployment/dependent-app -c check-redis
 kubectl logs deployment/dependent-app -c check-api
 ```
+![alt text](image-1.png)
 
 ### Exercise 4: Data Initialization InitContainer
 ```bash
@@ -509,28 +511,13 @@ spec:
         args:
         - |
           echo "Starting data initialization..."
-          
-          # Create directory structure
-          mkdir -p /app-data/users
-          mkdir -p /app-data/config
-          mkdir -p /app-data/cache
-          
-          # Copy and process initial data
+          mkdir -p /app-data/users /app-data/config /app-data/cache
           cp /init-data/users.json /app-data/users/
           cp /init-data/config.yaml /app-data/config/
-          
-          # Generate additional data
           echo "Generating cache data..."
-          for i in $(seq 1 100); do
-            echo "cache-entry-$i:value-$i" >> /app-data/cache/cache.txt
-          done
-          
-          # Set permissions
+          i=1; while [ $i -le 100 ]; do echo "cache-entry-$i:value-$i" >> /app-data/cache/cache.txt; i=$((i+1)); done
           chmod -R 755 /app-data
-          
           echo "Data initialization completed!"
-          echo "Files created:"
-          find /app-data -type f -exec ls -la {} \;
         volumeMounts:
         - name: init-data
           mountPath: /init-data
@@ -546,13 +533,6 @@ spec:
           mountPath: /usr/share/nginx/html/data
         - name: app-content
           mountPath: /usr/share/nginx/html
-        command: ['sh', '-c']
-        args:
-        - |
-          echo "Application starting..."
-          echo "Checking initialized data..."
-          ls -la /usr/share/nginx/html/data/
-          nginx -g 'daemon off;'
       volumes:
       - name: init-data
         configMap:
@@ -574,22 +554,14 @@ data:
     <html>
     <head>
         <title>Data Processing App</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .data-info { background-color: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 5px; }
-        </style>
     </head>
     <body>
-        <h1>📊 Data Processing Application</h1>
-        <div class="data-info">
-            <h3>Initialized Data</h3>
-            <p>The application has been initialized with the following data:</p>
-            <ul>
-                <li><a href="/data/users/users.json">User Data</a></li>
-                <li><a href="/data/config/config.yaml">Configuration</a></li>
-                <li><a href="/data/cache/cache.txt">Cache Data</a></li>
-            </ul>
-        </div>
+        <h1>Data Processing Application</h1>
+        <ul>
+            <li><a href="/data/users/users.json">User Data</a></li>
+            <li><a href="/data/config/config.yaml">Configuration</a></li>
+            <li><a href="/data/cache/cache.txt">Cache Data</a></li>
+        </ul>
     </body>
     </html>
 EOF
@@ -612,6 +584,7 @@ kubectl delete -f data-init-app.yaml
 # Clean up files
 rm -f basic-init-pod.yaml db-migration-app.yaml service-dependency-app.yaml data-init-app.yaml
 ```
+![alt text](image-2.png)
 
 ## Key Takeaways
 1. InitContainers run before main containers and must complete successfully
