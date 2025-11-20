@@ -41,6 +41,8 @@ EOF
 
 kubectl create configmap app-properties --from-file=app.properties
 
+![alt text](image.png)
+
 # Create ConfigMap from directory
 mkdir config-files
 echo "server.port=8080" > config-files/server.conf
@@ -52,6 +54,8 @@ kubectl get configmaps
 kubectl describe configmap app-config
 kubectl get configmap app-config -o yaml
 ```
+![alt text](image-1.png)
+![alt text](image-2.png)
 
 ### Exercise 2: Basic Secrets
 ```bash
@@ -81,11 +85,14 @@ kubectl create secret docker-registry registry-secret \
   --docker-password=mypass \
   --docker-email=user@example.com
 
+![alt text](image-3.png)
+
 # View Secrets (data is base64 encoded)
 kubectl get secrets
 kubectl describe secret db-credentials
 kubectl get secret db-credentials -o yaml
 ```
+![alt text](image-4.png)
 
 ### Exercise 3: Using ConfigMaps in Pods
 ```bash
@@ -173,6 +180,7 @@ kubectl exec configmap-volume-pod -- ls -la /etc/config
 kubectl exec configmap-volume-pod -- cat /etc/config/database_host
 kubectl exec configmap-volume-pod -- cat /etc/properties/app.properties
 ```
+![alt text](image-5.png)
 
 ### Exercise 5: Using Secrets in Pods
 ```bash
@@ -217,6 +225,7 @@ kubectl wait --for=condition=Ready pod/secret-env-pod --timeout=120s
 # Test database connection
 kubectl exec secret-env-pod -- mysql -u admin -psupersecret123 -e "SHOW DATABASES;"
 ```
+![alt text](image-6.png)
 
 ### Exercise 6: Mounting Secrets as Volumes
 ```bash
@@ -258,6 +267,7 @@ kubectl exec secret-volume-pod -- ls -la /etc/secrets
 kubectl exec secret-volume-pod -- cat /etc/secrets/username
 kubectl exec secret-volume-pod -- ls -la /etc/tls
 ```
+![alt text](image-7.png)
 
 ### Exercise 7: Application with Complete Configuration
 ```bash
@@ -407,6 +417,9 @@ kubectl port-forward service/web-app-service 8080:80 &
 curl http://localhost:8080
 kill %1
 ```
+![alt text](image-8.png)
+![alt text](image-9.png)
+![alt text](image-10.png)
 
 ## Cleanup
 ```bash

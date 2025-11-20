@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: secrets-probes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+      - name: web
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        env:
+        - name: APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: app_name
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: database_host
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: username
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: password
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d
+        - name: tls-volume
+          mountPath: /etc/nginx/ssl
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: config-volume
+        configMap:
+          name: nginx-config
+      - name: tls-volume
+        secret:
+          secretName: tls-secret
+      - name: html-volume
+        configMap:
+          name: html-content
+---
+# Nginx configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: secrets-probes
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
+    server {
+        listen 443 ssl;
+        server_name localhost;
+        ssl_certificate /etc/nginx/ssl/tls.crt;
+        ssl_certificate_key /etc/nginx/ssl/tls.key;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
+---
+# HTML content
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: html-content
+  namespace: secrets-probes
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Configured Web App</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .config { background-color: #f0f0f0; padding: 20px; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <h1>Web Application with Configuration</h1>
+        <div class="config">
+            <h3>Configuration loaded from ConfigMaps and Secrets</h3>
+            <p>This application demonstrates secure configuration management.</p>
+            <p>Database and credentials are loaded from Kubernetes resources.</p>
+        </div>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-service
+  namespace: secrets-probes
+spec:
+  selector:
+    app: web-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 30443
+  type: NodePort
