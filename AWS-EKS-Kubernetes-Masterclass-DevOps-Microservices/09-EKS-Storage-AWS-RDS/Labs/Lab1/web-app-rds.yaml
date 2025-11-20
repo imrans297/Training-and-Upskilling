@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app-rds
+  namespace: storage-rds
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-app-rds
+  template:
+    metadata:
+      labels:
+        app: web-app-rds
+    spec:
+      containers:
+      - name: web-app
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: host
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: port
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: database
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: username
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: password
+        - name: POOL_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: mysql-config
+              key: pool_size
+        volumeMounts:
+        - name: html-content
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-content
+        configMap:
+          name: web-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-content
+  namespace: storage-rds
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>RDS Integration Demo</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .info { background-color: #e8f4fd; padding: 20px; margin: 20px 0; border-radius: 5px; }
+            .success { background-color: #d4edda; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        </style>
+    </head>
+    <body>
+        <h1>🗄️ EKS + RDS Integration</h1>
+        <div class="info">
+            <h3>Database Configuration</h3>
+            <p><strong>Host:</strong> <span id="db-host">Loading...</span></p>
+            <p><strong>Database:</strong> webapp</p>
+            <p><strong>Connection Pool:</strong> <span id="pool-size">Loading...</span></p>
+            <p><strong>Status:</strong> <span class="success">✅ Connected to RDS MySQL</span></p>
+        </div>
+        <div class="info">
+            <h3>Application Features</h3>
+            <ul>
+                <li>Secure credential management with Kubernetes Secrets</li>
+                <li>Configuration management with ConfigMaps</li>
+                <li>Network isolation with VPC security groups</li>
+                <li>Encrypted RDS storage</li>
+                <li>Multi-AZ backup configuration</li>
+            </ul>
+        </div>
+        <script>
+            // In a real app, these would come from API calls
+            document.getElementById('db-host').textContent = 'RDS MySQL Instance';
+            document.getElementById('pool-size').textContent = '10 connections';
+        </script>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-rds-service
+  namespace: storage-rds
+spec:
+  selector:
+    app: web-app-rds
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30083
+  type: NodePort

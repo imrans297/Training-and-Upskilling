@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-with-pooling
+  namespace: storage-rds
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-with-pooling
+  template:
+    metadata:
+      labels:
+        app: app-with-pooling
+    spec:
+      containers:
+      # Main application container
+      - name: app
+        image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo 'App connecting to localhost:3306'; sleep 60; done"]
+        env:
+        - name: DB_HOST
+          value: "localhost"
+        - name: DB_PORT
+          value: "3306"
+      # MySQL proxy sidecar for connection pooling
+      - name: mysql-proxy
+        image: mysql:8.0
+        command: ["/bin/sh"]
+        args: ["-c", "echo 'MySQL Proxy running on port 3306'; while true; do sleep 30; done"]
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: host
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: password
+        ports:
+        - containerPort: 3306

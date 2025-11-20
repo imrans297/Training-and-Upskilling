@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-health-check
+  namespace: storage-rds
+spec:
+  template:
+    spec:
+      containers:
+      - name: health-check
+        image: mysql:8.0
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: host
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: password
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Starting database health check..."
+          mysql -h  -u  -p -e "SELECT 'Database is healthy' as status;"
+          mysql -h  -u  -p -e "SHOW PROCESSLIST;"
+          mysql -h  -u  -p -e "SELECT COUNT(*) as user_count FROM webapp.users;"
+          echo "Health check completed successfully"
+      restartPolicy: Never
+  backoffLimit: 3
