@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+  namespace: storage-rds
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: mysql:8.0
+            command: ["/bin/sh", "-c"]
+            args:
+            - |
+              BACKUP_FILE="/backup/webapp-$(date +%Y%m%d-%H%M%S).sql"
+              echo "Starting backup to $BACKUP_FILE..."
+              mysqldump -h$MYSQL_HOST -u$MYSQL_USER -p$MYSQL_PASSWORD webapp > $BACKUP_FILE
+              echo "Backup completed: $(ls -lh $BACKUP_FILE)"
+              echo "Total backups: $(ls -1 /backup | wc -l)"
+            env:
+            - name: MYSQL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: host
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: password
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backup
+          volumes:
+          - name: backup-storage
+            emptyDir: {}
+          restartPolicy: OnFailure

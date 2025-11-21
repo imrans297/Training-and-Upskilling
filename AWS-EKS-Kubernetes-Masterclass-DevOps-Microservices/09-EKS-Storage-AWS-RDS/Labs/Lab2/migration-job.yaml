@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration
+  namespace: storage-rds
+spec:
+  template:
+    spec:
+      containers:
+      - name: flyway
+        image: flyway/flyway:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Starting database migration..."
+          flyway -url=jdbc:mysql://$MYSQL_HOST:3306/webapp -user=$MYSQL_USER -password=$MYSQL_PASSWORD -locations=filesystem:/flyway/sql migrate
+          echo "Migration completed!"
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: host
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: password
+        volumeMounts:
+        - name: migrations
+          mountPath: /flyway/sql
+      volumes:
+      - name: migrations
+        configMap:
+          name: flyway-migrations
+      restartPolicy: Never
+  backoffLimit: 3

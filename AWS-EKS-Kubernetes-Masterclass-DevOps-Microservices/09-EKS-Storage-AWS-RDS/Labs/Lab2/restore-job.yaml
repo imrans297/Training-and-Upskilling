@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-restore
+  namespace: storage-rds
+spec:
+  template:
+    spec:
+      containers:
+      - name: restore
+        image: mysql:8.0
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Creating restore test database..."
+          mysql -h$MYSQL_HOST -u$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE IF NOT EXISTS webapp_restore;"
+          echo "Restoring from backup..."
+          mysql -h$MYSQL_HOST -u$MYSQL_USER -p$MYSQL_PASSWORD webapp_restore < /backup/latest-backup.sql
+          echo "Verifying restore..."
+          mysql -h$MYSQL_HOST -u$MYSQL_USER -p$MYSQL_PASSWORD webapp_restore -e "SHOW TABLES; SELECT COUNT(*) FROM users;"
+          echo "Restore completed successfully!"
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: host
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: password
+        volumeMounts:
+        - name: backup-storage
+          mountPath: /backup
+      volumes:
+      - name: backup-storage
+        emptyDir: {}
+      restartPolicy: Never
+  backoffLimit: 3
