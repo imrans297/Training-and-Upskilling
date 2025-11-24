@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-app
+  namespace: lb-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html
+        configMap:
+          name: nginx-content
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-content
+  namespace: lb-demo
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head><title>CLB Demo</title></head>
+    <body>
+      <h1>Classic Load Balancer Demo</h1>
+      <p>Hostname: <span id="hostname"></span></p>
+      <script>
+        fetch('/hostname').then(r => r.text()).then(h => 
+          document.getElementById('hostname').textContent = h
+        );
+      </script>
+    </body>
+    </html>

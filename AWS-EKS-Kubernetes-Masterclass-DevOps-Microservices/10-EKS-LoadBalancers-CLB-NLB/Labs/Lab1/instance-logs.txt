@@ -1,0 +1,116 @@
+i-0b52a1ba712d4712b	[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[0m[35m[40m[2J[01;01H[=3h[2J[01;01H[0m[37m[40m  Booting `Amazon Linux (6.1.158-178.288.amzn2023.x86_64) 2023'
+
+[    0.068886] RETBleed: WARNING: Spectre v2 mitigation leaves CPU vulnerable to RETBleed attacks, data leaks possible!
+[   14.692179] systemd-journald[859]: Received client request to flush runtime journal.
+[   16.291944] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[   16.293170] i8042: Warning: Keylock active
+[   16.306135] serio: i8042 KBD port at 0x60,0x64 irq 1
+[   16.306728] serio: i8042 AUX port at 0x60,0x64 irq 12
+[   16.353277] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input0
+[   16.403055] ACPI: button: Power Button [PWRF]
+[   16.403642] input: Sleep Button as /devices/LNXSYSTM:00/LNXSLPBN:00/input/input1
+[   16.404646] ACPI: button: Sleep Button [SLPF]
+[   16.496755] RPC: Registered named UNIX socket transport module.
+[   16.497499] RPC: Registered udp transport module.
+[   16.498110] RPC: Registered tcp transport module.
+[   16.498742] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[   16.596620] ena 0000:00:05.0: Elastic Network Adapter (ENA) v2.15.0g
+[   16.603029] ena 0000:00:05.0: ENA device version: 0.10
+[   16.603621] ena 0000:00:05.0: ENA controller version: 0.0.1 implementation version 1
+[   16.683016] ena 0000:00:05.0: LLQ is not supported Fallback to host mode policy.
+[   16.695450] ena 0000:00:05.0: Elastic Network Adapter (ENA) found at mem c0400000, mac addr 0a:d0:f5:e7:c0:bf
+[   16.783105] ena 0000:00:05.0 ens5: renamed from eth0
+[   17.024258] zram_generator::config[1436]: zram0: system has too much memory (3827MB), limit is 800MB, ignoring.
+[   17.992391] rm[1460]: removed '/var/lib/cloud/instance/boot-finished'
+[   17.993787] rm[1460]: removed '/var/lib/cloud/instance'
+[   18.647805] ena 0000:00:05.0 ens5: Local page cache is disabled for less than 16 channels
+[   25.130041] cloud-init[1606]: Cloud-init v. 22.2.2 running 'init' at Fri, 21 Nov 2025 05:19:24 +0000. Up 25.04 seconds.
+[   25.226316] cloud-init[1606]: ci-info: +++++++++++++++++++++++++++++++++++++++Net device info++++++++++++++++++++++++++++++++++++++++
+[   25.228456] cloud-init[1606]: ci-info: +--------+------+-----------------------------+-----------------+--------+-------------------+
+[   25.230413] cloud-init[1606]: ci-info: | Device |  Up  |           Address           |       Mask      | Scope  |     Hw-Address    |
+[   25.232442] cloud-init[1606]: ci-info: +--------+------+-----------------------------+-----------------+--------+-------------------+
+[   25.234361] cloud-init[1606]: ci-info: |  ens5  | True |        172.31.36.100        | 255.255.255.128 | global | 0a:d0:f5:e7:c0:bf |
+[   25.236301] cloud-init[1606]: ci-info: |  ens5  | True | fe80::8d0:f5ff:fee7:c0bf/64 |        .        |  link  | 0a:d0:f5:e7:c0:bf |
+[   25.238190] cloud-init[1606]: ci-info: |   lo   | True |          127.0.0.1          |    255.0.0.0    |  host  |         .         |
+[   25.240139] cloud-init[1606]: ci-info: |   lo   | True |           ::1/128           |        .        |  host  |         .         |
+[   25.242028] cloud-init[1606]: ci-info: +--------+------+-----------------------------+-----------------+--------+-------------------+
+[   25.243970] cloud-init[1606]: ci-info: ++++++++++++++++++++++++++++++Route IPv4 info++++++++++++++++++++++++++++++
+[   25.245619] cloud-init[1606]: ci-info: +-------+-------------+-------------+-----------------+-----------+-------+
+[   25.247293] cloud-init[1606]: ci-info: | Route | Destination |   Gateway   |     Genmask     | Interface | Flags |
+[   25.248961] cloud-init[1606]: ci-info: +-------+-------------+-------------+-----------------+-----------+-------+
+[   25.250695] cloud-init[1606]: ci-info: |   0   |   0.0.0.0   | 172.31.36.1 |     0.0.0.0     |    ens5   |   UG  |
+[   25.252520] cloud-init[1606]: ci-info: |   1   |  172.31.0.2 | 172.31.36.1 | 255.255.255.255 |    ens5   |  UGH  |
+[   25.254240] cloud-init[1606]: ci-info: |   2   | 172.31.36.0 |   0.0.0.0   | 255.255.255.128 |    ens5   |   U   |
+[   25.255982] cloud-init[1606]: ci-info: |   3   | 172.31.36.1 |   0.0.0.0   | 255.255.255.255 |    ens5   |   UH  |
+[   25.257629] cloud-init[1606]: ci-info: +-------+-------------+-------------+-----------------+-----------+-------+
+[   25.259340] cloud-init[1606]: ci-info: +++++++++++++++++++Route IPv6 info+++++++++++++++++++
+[   25.260767] cloud-init[1606]: ci-info: +-------+-------------+---------+-----------+-------+
+[   25.262817] cloud-init[1606]: ci-info: | Route | Destination | Gateway | Interface | Flags |
+[   25.264243] cloud-init[1606]: ci-info: +-------+-------------+---------+-----------+-------+
+[   25.265641] cloud-init[1606]: ci-info: |   0   |  fe80::/64  |    ::   |    ens5   |   U   |
+[   25.267122] cloud-init[1606]: ci-info: |   2   |    local    |    ::   |    ens5   |   U   |
+[   25.268584] cloud-init[1606]: ci-info: |   3   |  multicast  |    ::   |    ens5   |   U   |
+[   25.269978] cloud-init[1606]: ci-info: +-------+-------------+---------+-----------+-------+
+[   26.226960] cloud-init[1606]: 2025-11-21 05:19:25,564 - __init__.py[WARNING]: Unhandled unknown content-type (application/node.eks.aws) userdata: 'b'apiVersion: node.eks.aws'...'
+[   27.310360] cloud-init[1606]: Generating public/private ed25519 key pair.
+[   27.311978] cloud-init[1606]: Your identification has been saved in /etc/ssh/ssh_host_ed25519_key
+[   27.313822] cloud-init[1606]: Your public key has been saved in /etc/ssh/ssh_host_ed25519_key.pub
+[   27.315337] cloud-init[1606]: The key fingerprint is:
+[   27.316222] cloud-init[1606]: SHA256:Yj9Tvawo0/5nbuHOmN7aZZhvx3ohkXxXEKc8tHpUnIk root@ip-172-31-36-100.ap-south-1.compute.internal
+[   27.318117] cloud-init[1606]: The key's randomart image is:
+[   27.319095] cloud-init[1606]: +--[ED25519 256]--+
+[   27.320146] cloud-init[1606]: |              =+=|
+[   27.330202] cloud-init[1606]: |             E Bo|
+[   27.331199] cloud-init[1606]: |            . B .|
+[   27.332097] cloud-init[1606]: |           . * o.|
+[   27.332932] cloud-init[1606]: |      o S . o + .|
+[   27.333789] cloud-init[1606]: |     . o . ..* . |
+[   27.334640] cloud-init[1606]: |       .+  .=.+..|
+[   27.335502] cloud-init[1606]: |      o .+ B=+. +|
+[   27.336360] cloud-init[1606]: |       +ooBB*.o+ |
+[   27.337222] cloud-init[1606]: +----[SHA256]-----+
+[   27.338064] cloud-init[1606]: Generating public/private ecdsa key pair.
+[   27.339207] cloud-init[1606]: Your identification has been saved in /etc/ssh/ssh_host_ecdsa_key
+[   27.340698] cloud-init[1606]: Your public key has been saved in /etc/ssh/ssh_host_ecdsa_key.pub
+[   27.342165] cloud-init[1606]: The key fingerprint is:
+[   27.343055] cloud-init[1606]: SHA256:bQX8JbV5NI7pBZU/nD6N9KREfQNY3OqrQZPv3a8X/JI root@ip-172-31-36-100.ap-south-1.compute.internal
+[   27.344990] cloud-init[1606]: The key's randomart image is:
+[   27.345953] cloud-init[1606]: +---[ECDSA 256]---+
+[   27.346787] cloud-init[1606]: |         .. +==+o|
+[   27.347648] cloud-init[1606]: |          .o..BB+|
+[   27.348484] cloud-init[1606]: |           ..*=o*|
+[   27.349316] cloud-init[1606]: |         . .+.+=o|
+[   27.350145] cloud-init[1606]: |        S o+.+o=o|
+[   27.350956] cloud-init[1606]: |         .. o.o=o|
+[   27.351780] cloud-init[1606]: |           . ...+|
+[   27.352585] cloud-init[1606]: |            o.E +|
+[   27.353424] cloud-init[1606]: |           ....=+|
+[   27.354247] cloud-init[1606]: +----[SHA256]-----+
+[   27.885335] cloud-init[1824]: Cloud-init v. 22.2.2 running 'modules:config' at Fri, 21 Nov 2025 05:19:27 +0000. Up 27.77 seconds.
+[   28.769351] cloud-init[1836]: Cloud-init v. 22.2.2 running 'modules:final' at Fri, 21 Nov 2025 05:19:28 +0000. Up 28.67 seconds.
+ci-info: ++++++++++++++++++++++++++++++++Authorized keys from /home/ec2-user/.ssh/authorized_keys for user ec2-user+++++++++++++++++++++++++++++++++
+ci-info: +---------+-------------------------------------------------------------------------------------------------+---------+-------------------+
+ci-info: | Keytype |                                       Fingerprint (sha256)                                      | Options |      Comment      |
+ci-info: +---------+-------------------------------------------------------------------------------------------------+---------+-------------------+
+ci-info: | ssh-rsa | d0:25:17:78:12:28:4e:d5:66:4e:66:cf:91:36:34:1d:71:a8:d7:79:29:a7:4b:7c:e7:eb:c3:72:35:04:39:a8 |    -    |      amir_key     |
+ci-info: | ssh-rsa | 9b:05:48:ff:c6:ea:6f:29:04:0d:00:00:ac:53:34:02:4d:c7:9f:0c:dc:78:dd:e4:f9:85:53:e6:c4:ba:fc:e0 |    -    | eks-demo-1_keyIMR |
+ci-info: +---------+-------------------------------------------------------------------------------------------------+---------+-------------------+
+<14>Nov 21 05:19:28 cloud-init: #############################################################
+<14>Nov 21 05:19:28 cloud-init: -----BEGIN SSH HOST KEY FINGERPRINTS-----
+<14>Nov 21 05:19:28 cloud-init: 256 SHA256:bQX8JbV5NI7pBZU/nD6N9KREfQNY3OqrQZPv3a8X/JI root@ip-172-31-36-100.ap-south-1.compute.internal (ECDSA)
+<14>Nov 21 05:19:28 cloud-init: 256 SHA256:Yj9Tvawo0/5nbuHOmN7aZZhvx3ohkXxXEKc8tHpUnIk root@ip-172-31-36-100.ap-south-1.compute.internal (ED25519)
+<14>Nov 21 05:19:28 cloud-init: -----END SSH HOST KEY FINGERPRINTS-----
+<14>Nov 21 05:19:28 cloud-init: #############################################################
+-----BEGIN SSH HOST KEY KEYS-----
+ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAHEPmfyb4FKsgRItmuDwAXRnphG99ea9869L3kvxH8P4uslHzHAgE7ARpcmlLCa8TG1nPw0i7Mda5FrnKIct44= root@ip-172-31-36-100.ap-south-1.compute.internal
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB2Kp0gBhnvX1MKTSDyw5dfI9mUpxHV8KRvhTf1nw9gF root@ip-172-31-36-100.ap-south-1.compute.internal
+-----END SSH HOST KEY KEYS-----
+[   29.050948] cloud-init[1836]: Cloud-init v. 22.2.2 finished at Fri, 21 Nov 2025 05:19:28 +0000. Datasource DataSourceEc2.  Up 29.04 seconds
+
+Amazon Linux 2023.9.20251110
+Kernel 6.1.158-178.288.amzn2023.x86_64 on an x86_64 (-)
+
+ip-172-31-36-100 login: 2025/11/21 05:19:34Z: Amazon SSM Agent v3.3.3050.0 is running
+2025/11/21 05:19:34Z: OsProductName: Amazon Linux
+2025/11/21 05:19:34Z: OsVersion: 2023
+	2025-11-21T05:25:15+00:00
