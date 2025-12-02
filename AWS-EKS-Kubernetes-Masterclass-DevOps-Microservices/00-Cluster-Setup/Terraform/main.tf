@@ -157,7 +157,7 @@ resource "aws_security_group" "eks_cluster" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["106.215.176.143/32"]
+    cidr_blocks = [var.my_ip]
   }
 
   egress {
@@ -181,7 +181,7 @@ resource "aws_security_group" "eks_nodes" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["106.215.176.143/32"]
+    cidr_blocks = [var.my_ip]
   }
 
   ingress {
@@ -189,7 +189,7 @@ resource "aws_security_group" "eks_nodes" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["106.215.176.143/32"]
+    cidr_blocks = [var.my_ip]
   }
 
   ingress {
@@ -197,7 +197,7 @@ resource "aws_security_group" "eks_nodes" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["106.215.176.143/32"]
+    cidr_blocks = [var.my_ip]
   }
 
   ingress {
@@ -238,7 +238,7 @@ resource "aws_eks_cluster" "training_cluster" {
     subnet_ids              = concat(aws_subnet.private[*].id, aws_subnet.public[*].id)
     endpoint_private_access = true
     endpoint_public_access  = true
-    public_access_cidrs     = ["106.215.176.143/32"]
+    public_access_cidrs     = [var.my_ip]
     security_group_ids      = [aws_security_group.eks_cluster.id]
   }
 
@@ -250,6 +250,38 @@ resource "aws_eks_cluster" "training_cluster" {
   ]
 
   tags = local.common_tags
+}
+
+# Launch Template with Custom AMI
+resource "aws_launch_template" "eks_nodes" {
+  count = var.custom_ami_id != "" ? 1 : 0
+
+  name_prefix = "${var.cluster_name}-node-"
+  image_id    = var.custom_ami_id
+  key_name    = var.key_pair_name
+
+  vpc_security_group_ids = [aws_security_group.eks_nodes.id]
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    set -o xtrace
+    /etc/eks/bootstrap.sh ${var.cluster_name}
+    EOF
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(local.common_tags, {
+      Name = "${var.cluster_name}-node"
+    })
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags = merge(local.common_tags, {
+      Name = "${var.cluster_name}-node-volume"
+    })
+  }
 }
 
 # EKS Node Group
@@ -272,9 +304,19 @@ resource "aws_eks_node_group" "training_nodes" {
     max_unavailable = 1
   }
 
-  remote_access {
-    ec2_ssh_key               = var.key_pair_name
-    source_security_group_ids = [aws_security_group.eks_nodes.id]
+  dynamic "launch_template" {
+    for_each = var.custom_ami_id != "" ? [1] : []
+    content {
+      id      = aws_launch_template.eks_nodes[0].id
+      version = "$Latest"
+    }
+  }
+
+  dynamic "remote_access" {
+    for_each = var.custom_ami_id == "" ? [1] : []
+    content {
+      ec2_ssh_key = var.key_pair_name
+    }
   }
 
   depends_on = [
@@ -283,7 +325,9 @@ resource "aws_eks_node_group" "training_nodes" {
     aws_iam_role_policy_attachment.node_group_AmazonEC2ContainerRegistryReadOnly,
   ]
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, {
+    "Name" = "${var.cluster_name}-node"
+  })
 }
 
 # CloudWatch Log Group
@@ -321,38 +365,3 @@ provider "helm" {
   }
 }
 
-# Create training namespaces
-resource "kubernetes_namespace" "training_namespaces" {
-  for_each = toset([
-    "docker-fundamentals",
-    "k8s-imperative",
-    "k8s-declarative",
-    "pod-identity",
-    "storage-ebs",
-    "secrets-probes",
-    "storage-rds",
-    "loadbalancers",
-    "alb-controller",
-    "ingress-basics",
-    "ingress-context-path",
-    "ingress-host-header",
-    "ingress-groups",
-    "ingress-target-ip",
-    "ingress-internal",
-    "ecr-integration",
-    "microservices",
-    "hpa-autoscaler",
-    "vpa-autoscaler",
-    "cluster-autoscaler",
-    "container-insights"
-  ])
-
-  metadata {
-    name = each.value
-    labels = {
-      "training-section" = each.value
-    }
-  }
-
-  depends_on = [aws_eks_cluster.training_cluster]
-}

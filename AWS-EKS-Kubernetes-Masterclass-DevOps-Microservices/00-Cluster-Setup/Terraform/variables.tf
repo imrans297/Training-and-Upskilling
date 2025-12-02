@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "cluster_name" {
   description = "EKS cluster name"
   type        = string
-  default     = "training-cluster"
+  default     = "AWS_EKS-cluster"
 }
 
 variable "cluster_version" {
@@ -56,6 +56,18 @@ variable "key_pair_name" {
   description = "EC2 Key Pair name for SSH access to worker nodes"
   type        = string
   default     = "eks-demo-1_keyIMR"
+}
+
+variable "custom_ami_id" {
+  description = "Custom AMI ID with MDATP pre-installed (leave empty to use default EKS AMI)"
+  type        = string
+  default     = ""
+}
+
+variable "my_ip" {
+  description = "Your IP address for security group restrictions"
+  type        = string
+  default     = "106.215.176.143/32"
 }
 
 locals {

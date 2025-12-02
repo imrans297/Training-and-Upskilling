@@ -18,10 +18,13 @@ This Terraform configuration creates a production-ready EKS cluster with securit
 ## Quick Deployment
 
 ```bash
-# Make scripts executable
+# 1. Configure MDATP onboarding (see MDATP-SETUP.md)
+# Edit user-data.sh and add your onboarding files
+
+# 2. Make scripts executable
 chmod +x deploy.sh create-keypair.sh
 
-# Deploy the cluster
+# 3. Deploy the cluster
 ./deploy.sh
 ```
 
@@ -75,9 +78,28 @@ Edit `terraform.tfvars` to customize:
   - Node-to-node communication within VPC
 - **Outbound**: All traffic allowed
 
+## Resource Tagging
+
+All resources are automatically tagged with:
+- Owner, Project, Department information
+- Environment and lifecycle metadata
+- Cost allocation tags
+
+See [TAGGING-SUMMARY.md](TAGGING-SUMMARY.md) for complete details.
+
+## MDATP Integration
+
+All EC2 nodes are automatically configured with Microsoft Defender for Endpoint.
+
+See [MDATP-SETUP.md](MDATP-SETUP.md) for configuration instructions.
+
 ## Cleanup
 
 ```bash
+# Use the cleanup script
+./destroy.sh
+
+# Or manually
 terraform destroy
 ```
 
