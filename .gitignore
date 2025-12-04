@@ -28,3 +28,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+#key
+*.pem
+*.pub
+gdp-web-key
