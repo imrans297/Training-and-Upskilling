@@ -1,0 +1,11 @@
+{
+  "detail": {
+    "requestParameters": {
+      "instanceId": "i-0b2fa2f35913cac0c",
+      "name": "gdp-web-1-final-test"
+    },
+    "responseElements": {
+      "imageId": "ami-028bf90020710081f"
+    }
+  }
+}

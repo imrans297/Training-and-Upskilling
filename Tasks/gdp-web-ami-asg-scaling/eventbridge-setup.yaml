@@ -1,0 +1,184 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'EventBridge + Lambda for Dynamic AMI Backup Triggering'
+
+Resources:
+  # IAM Role for Event-Driven Lambda
+  EventLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: gdp-web-event-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: EC2ImageAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeImages
+                Resource: '*'
+
+  # Event-Driven Lambda Function
+  EventDrivenLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: gdp-web-event-driven-ami
+      Runtime: python3.11
+      Handler: index.lambda_handler
+      Role: !GetAtt EventLambdaRole.Arn
+      Timeout: 30
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+          from datetime import datetime
+
+          def lambda_handler(event, context):
+              ec2 = boto3.client('ec2')
+              
+              try:
+                  # Extract AMI ID from EventBridge event
+                  ami_id = event['detail']['responseElements']['imageId']
+                  
+                  # Get AMI details
+                  response = ec2.describe_images(ImageIds=[ami_id])
+                  
+                  if not response['Images']:
+                      return {'statusCode': 404, 'message': 'AMI not found'}
+                  
+                  ami_info = response['Images'][0]
+                  ami_name = ami_info['Name']
+                  
+                  # Determine application
+                  app_name = None
+                  if ami_name.startswith('gdp-web-1-'):
+                      app_name = 'gdp-web-1'
+                  elif ami_name.startswith('gdp-web-2-'):
+                      app_name = 'gdp-web-2'
+                  elif ami_name.startswith('gdp-web-3-'):
+                      app_name = 'gdp-web-3'
+                  
+                  if not app_name:
+                      return {'statusCode': 400, 'message': f'AMI {ami_name} does not match GDP-Web pattern'}
+                  
+                  # Get latest AMI for this application
+                  app_response = ec2.describe_images(
+                      Owners=['self'],
+                      Filters=[
+                          {'Name': 'name', 'Values': [f'{app_name}-*']},
+                          {'Name': 'state', 'Values': ['available']}
+                      ]
+                  )
+                  
+                  if app_response['Images']:
+                      latest_ami = sorted(app_response['Images'], key=lambda x: x['CreationDate'], reverse=True)[0]
+                      
+                      return {
+                          'statusCode': 200,
+                          'triggered_by_ami': ami_id,
+                          'application': app_name,
+                          'latest_ami': {
+                              'ami_id': latest_ami['ImageId'],
+                              'ami_name': latest_ami['Name'],
+                              'creation_date': latest_ami['CreationDate'],
+                              'is_new_backup': latest_ami['ImageId'] == ami_id
+                          },
+                          'timestamp': datetime.utcnow().isoformat() + 'Z'
+                      }
+                  else:
+                      return {'statusCode': 404, 'message': f'No AMIs found for {app_name}'}
+                      
+              except Exception as e:
+                  return {'statusCode': 500, 'message': f'Error: {str(e)}'}
+
+  # EventBridge Rule for AMI Creation
+  AMICreationRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: gdp-web-ami-creation-rule
+      Description: 'Trigger Lambda when GDP-Web AMI is created'
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - ec2.amazonaws.com
+          eventName:
+            - CreateImage
+          responseElements:
+            imageId:
+              - exists: true
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt EventDrivenLambda.Arn
+          Id: EventDrivenLambdaTarget
+
+  # Lambda Permission for EventBridge
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref EventDrivenLambda
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt AMICreationRule.Arn
+
+  # CloudTrail for API Events (if not exists)
+  CloudTrail:
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      TrailName: gdp-web-cloudtrail
+      S3BucketName: !Ref CloudTrailBucket
+      IncludeGlobalServiceEvents: true
+      IsMultiRegionTrail: true
+      EnableLogFileValidation: true
+
+  # S3 Bucket for CloudTrail
+  CloudTrailBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'gdp-web-cloudtrail-${AWS::AccountId}-${AWS::Region}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # CloudTrail Bucket Policy
+  CloudTrailBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CloudTrailBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub '${CloudTrailBucket}/*'
+            Condition:
+              StringEquals:
+                's3:x-amz-acl': bucket-owner-full-control
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource: !Ref CloudTrailBucket
+
+Outputs:
+  LambdaFunctionName:
+    Description: Event-driven Lambda function name
+    Value: !Ref EventDrivenLambda
+  
+  EventRuleName:
+    Description: EventBridge rule name
+    Value: !Ref AMICreationRule
