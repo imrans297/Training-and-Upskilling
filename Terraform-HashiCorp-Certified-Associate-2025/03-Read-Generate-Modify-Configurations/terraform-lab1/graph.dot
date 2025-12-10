@@ -1,0 +1,9 @@
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "aws_instance.web" [label="aws_instance.web"];
+  "aws_s3_bucket.data" [label="aws_s3_bucket.data"];
+  "aws_s3_bucket.manual" [label="aws_s3_bucket.manual"];
+  "random_id.suffix" [label="random_id.suffix"];
+  "aws_s3_bucket.data" -> "random_id.suffix";
+}
