@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "Products API",
+    "description": "Serverless Products API built with AWS Lambda, API Gateway, and DynamoDB",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://v7dul4vebf.execute-api.us-east-1.amazonaws.com/prod",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Add Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"P001\",\n  \"name\": \"Laptop\",\n  \"price\": 999.99,\n  \"description\": \"Gaming laptop\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List All Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/P001",
+          "host": ["{{baseUrl}}"],
+          "path": ["products", "P001"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Mouse Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"P002\",\n  \"name\": \"Mouse\",\n  \"price\": 29.99,\n  \"description\": \"Wireless mouse\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["products"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Keyboard Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"P003\",\n  \"name\": \"Keyboard\",\n  \"price\": 79.99,\n  \"description\": \"Mechanical keyboard\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["products"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
