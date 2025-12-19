@@ -33,3 +33,5 @@ Thumbs.db
 *.pem
 *.pub
 gdp-web-key
+
+DOCUMENTATION.md
