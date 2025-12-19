@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: team-a-sm
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      team: a
+  namespaceSelector:
+    matchNames:
+      - team-a
+  endpoints:
+    - port: http

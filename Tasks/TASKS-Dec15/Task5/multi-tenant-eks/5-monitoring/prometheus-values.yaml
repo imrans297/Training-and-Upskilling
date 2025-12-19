@@ -1,0 +1,11 @@
+prometheus:
+  prometheusSpec:
+    retention: 12h
+    scrapeInterval: "30s"
+    resources:
+      requests:
+        memory: "300Mi"
+        cpu: "150m"
+      limits:
+        memory: "600Mi"
+        cpu: "300m"

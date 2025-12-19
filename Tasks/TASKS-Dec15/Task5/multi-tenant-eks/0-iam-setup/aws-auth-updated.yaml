@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::860839673297:role/eksctl-multi-tenant-eks-nodegroup--NodeInstanceRole-hbBRhCcif7HQ
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+  mapUsers: |
+    - userarn: arn:aws:iam::860839673297:user/team-a-user
+      username: team-a-user
+      groups:
+        - team-a
+    - userarn: arn:aws:iam::860839673297:user/team-b-user
+      username: team-b-user
+      groups:
+        - team-b

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: team-a-app
+  namespace: team-a
+  labels:
+    team: a
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: team-a-app
+  template:
+    metadata:
+      labels:
+        app: team-a-app
+        team: a
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "100m"
+            memory: "100Mi"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: team-a-service
+  namespace: team-a
+  labels:
+    team: a
+spec:
+  selector:
+    app: team-a-app
+  ports:
+  - port: 80
+    targetPort: 80
