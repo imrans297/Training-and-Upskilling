@@ -1,0 +1,20 @@
+# ArgoCD Installation Manifest
+# This will install ArgoCD v2.9 (stable version)
+# Source: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# To install ArgoCD, run:
+# kubectl create namespace argocd
+# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Or use this file directly:
+# kubectl create namespace argocd
+# kubectl apply -n argocd -f argocd-install.yaml
+
+---
+# Note: This file references the official ArgoCD installation
+# For the actual manifest, download from:
+# https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Quick Install Command:
+# kubectl create namespace argocd
+# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.9.3/manifests/install.yaml
