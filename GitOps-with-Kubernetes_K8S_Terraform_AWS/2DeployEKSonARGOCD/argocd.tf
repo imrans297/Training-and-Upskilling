@@ -58,12 +58,3 @@ resource "null_resource" "get_argocd_password" {
 
   depends_on = [null_resource.install_argocd]
 }
-
-# Deploy Mario Game Application
-resource "null_resource" "deploy_mario_game" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f applications/mario-game.yaml"
-  }
-
-  depends_on = [null_resource.install_argocd]
-}

@@ -1,6 +1,5 @@
 # ArgoCD Deployment via Terraform
-
-**Created by:** Imran Shaikh  
+ 
 **Method:** Terraform with null_resource
 
 ---
@@ -11,7 +10,6 @@ This Terraform configuration automatically:
 1. Configures kubectl for EKS cluster
 2. Installs ArgoCD on EKS
 3. Patches ArgoCD service to LoadBalancer
-4. Deploys Mario Game application
 
 ## Prerequisites
 
@@ -24,7 +22,6 @@ This Terraform configuration automatically:
 
 - `main.tf` - Terraform configuration with null_resource
 - `argocd-service-patch.yaml` - LoadBalancer service configuration
-- `applications/mario-game.yaml` - Mario game ArgoCD application
 
 ## Deployment Steps
 
@@ -70,17 +67,6 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 ### Check ArgoCD Pods
 ```bash
 kubectl get pods -n argocd
-```
-
-### Check Mario Game Application
-```bash
-kubectl get application -n argocd
-kubectl get pods -n mario
-```
-
-### Access Mario Game
-```bash
-kubectl get svc -n mario
 ```
 
 ## Cleanup
